@@ -51,3 +51,5 @@ Example usage with your NixOS configuration with k3s-extras:
     };
 }
 ```
+
+Also try the pod deployment example: `nix run ./example-gpu-pod#deploy-pod`
