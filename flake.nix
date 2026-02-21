@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs = { };
     nix-snapshotter = {
-      url = "github:bglgwyng/nix-snapshotter?ref=deprecate-patch-k3s-embedded-containerd";
+      url = "github:bglgwyng/nix-snapshotter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
