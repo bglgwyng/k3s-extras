@@ -13,7 +13,12 @@
     { nix-snapshotter, ... }:
     {
       nixosModules.default =
-        { pkgs, config, ... }:
+        {
+          pkgs,
+          config,
+          lib,
+          ...
+        }:
         {
           imports = [ nix-snapshotter.nixosModules.default ];
 
@@ -23,8 +28,6 @@
             enable = true;
             settings.image_service.containerd_address = "/run/k3s/containerd/containerd.sock";
           };
-
-          hardware.nvidia-container-toolkit.enable = true;
 
           services.k3s = {
             snapshotter = "nix";
@@ -36,15 +39,16 @@
             containerdConfigTemplate = ''
               {{ template "base" . }}
 
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
-                privileged_without_host_devices = false
-                runtime_engine = ""
-                runtime_root = ""
-                runtime_type = "io.containerd.runc.v2"
+              ${lib.optionalString config.hardware.nvidia-container-toolkit.enable ''
+                [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia]
+                  privileged_without_host_devices = false
+                  runtime_engine = ""
+                  runtime_root = ""
+                  runtime_type = "io.containerd.runc.v2"
 
-              [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
-                BinaryName = "${pkgs.nvidia-container-toolkit.tools}/bin/nvidia-container-runtime.cdi"
-
+                [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.nvidia.options]
+                  BinaryName = "${pkgs.nvidia-container-toolkit.tools}/bin/nvidia-container-runtime.cdi"
+              ''}
               [[plugins."io.containerd.transfer.v1.local".unpack_config]]
                 platform = "${pkgs.go.GOOS}/${pkgs.go.GOARCH}"
                 snapshotter = "nix"
